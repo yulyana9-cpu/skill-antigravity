@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutri-IA | Calculadora de Precisión Avícola</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030712;
+            --primary: #06b6d4;
+            --secondary: #3b82f6;
+            --accent: #10b981;
+            --glass: rgba(17, 24, 39, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
+            color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 1.5rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            padding: 0.5rem 1rem;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.5;
+            }
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sliders */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .slider-group {
+            position: relative;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .percentage {
+            color: var(--primary);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.05);
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--primary);
+            border: 3px solid #fff;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .metric-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        .metric-unit {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-left: 2px;
+        }
+
+        /* Sidebar stats */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .impact-chart {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 1.5rem;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chart-svg {
+            transform: rotate(-90deg);
+        }
+
+        .chart-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 12;
+        }
+
+        .chart-fill {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 12;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 220;
+            stroke-linecap: round;
+            transition: 0.5s ease;
+        }
+
+        .ai-advice {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(59, 130, 246, 0.1));
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 0 12px 12px 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .impact-value {
+            position: absolute;
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .btn-push {
+            grid-column: 1 / -1;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border: none;
+            padding: 1.2rem;
+            border-radius: 16px;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+        }
+
+        .btn-push:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <header class="glass-card">
+            <div class="logo">NUTRI-IA / PRECISION</div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                ANÁLISIS EN TIEMPO REAL: GALLINAS PONEDORAS
+            </div>
+        </header>
+
+        <main class="glass-card">
+            <h2>Optimización de Materias Primas</h2>
+            <div class="controls">
+                <div class="slider-group">
+                    <div class="slider-label"><span>MAÍZ AMARILLO</span> <span class="percentage"
+                            id="maiz-val">60%</span></div>
+                    <input type="range" id="maiz" min="30" max="80" value="60">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>HARINA DE SOJA</span> <span class="percentage"
+                            id="soja-val">30%</span></div>
+                    <input type="range" id="soja" min="10" max="50" value="30">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>NÚCLEO VITAMÍNICO</span> <span class="percentage"
+                            id="nucleo-val">10%</span></div>
+                    <input type="range" id="nucleo" min="5" max="15" value="10">
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <span class="metric-label">Proteína Crua</span>
+                    <span class="metric-value" id="proteina">17.4 <span class="metric-unit">%</span></span>
+                </div>
+                <div class="metric-item" style="border-color: var(--primary);">
+                    <span class="metric-label">Energía Met.</span>
+                    <span class="metric-value" id="energia">2850 <span class="metric-unit">kcal</span></span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-label">Lisina Dig.</span>
+                    <span class="metric-value" id="lisina">0.82 <span class="metric-unit">%</span></span>
+                </div>
+            </div>
+        </main>
+
+        <aside class="sidebar">
+            <div class="glass-card">
+                <h2>Impacto Ambiental</h2>
+                <div class="impact-chart">
+                    <svg class="chart-svg" width="150" height="150">
+                        <circle class="chart-bg" cx="75" cy="75" r="70"></circle>
+                        <circle class="chart-fill" id="chart-progress" cx="75" cy="75" r="70"></circle>
+                    </svg>
+                    <div class="impact-value" id="impact-pct">65%</div>
+                </div>
+                <p style="font-size: 0.8rem; color: #9ca3af; text-align: center;">Huella de CO₂ optimizada según
+                    formulación actual.</p>
+            </div>
+
+            <div class="glass-card">
+                <h2>Consejo de Nutri-IA</h2>
+                <div class="ai-advice" id="advice">
+                    El nivel de Proteína es óptimo para gallinas en semana 24. El aumento de soja impactará el costo,
+                    pero mejorará la persistencia de puesta.
+                </div>
+            </div>
+        </aside>
+
+        <button class="btn-push" id="btn-save">ENVIAR FORMULACIÓN A PRODUCCIÓN</button>
+    </div>
+
+    <script>
+        const maizS = document.getElementById('maiz');
+        const sojaS = document.getElementById('soja');
+        const nucleoS = document.getElementById('nucleo');
+
+        const maizV = document.getElementById('maiz-val');
+        const sojaV = document.getElementById('soja-val');
+        const nucleoV = document.getElementById('nucleo-val');
+
+        const proteinaE = document.getElementById('proteina');
+        const energiaE = document.getElementById('energia');
+        const lisinaE = document.getElementById('lisina');
+        const progressE = document.getElementById('chart-progress');
+        const impactE = document.getElementById('impact-pct');
+        const adviceE = document.getElementById('advice');
+
+        function update() {
+            const m = parseInt(maizS.value);
+            const s = parseInt(sojaS.value);
+            const n = parseInt(nucleoS.value);
+
+            // Normalize sum to 100% (basic visual simulation)
+            const sum = m + s + n;
+            const pm = (m / sum * 100).toFixed(1);
+            const ps = (s / sum * 100).toFixed(1);
+            const pn = (n / sum * 100).toFixed(1);
+
+            maizV.innerText = pm + '%';
+            sojaV.innerText = ps + '%';
+            nucleoV.innerText = pn + '%';
+
+            // Calc simulated metrics
+            const prot = (m * 0.085 + s * 0.46 + n * 0.1).toFixed(1);
+            const ener = (m * 3350 + s * 2250 + n * 1000).toFixed(0);
+            const lisin = (s * 0.027).toFixed(2);
+
+            proteinaE.innerHTML = `${prot} <span class="metric-unit">%</span>`;
+            energiaE.innerHTML = `${ener} <span class="metric-unit">kcal</span>`;
+            lisinaE.innerHTML = `${lisin} <span class="metric-unit">%</span>`;
+
+            // Chart update
+            const dash = 440;
+            const pct = Math.min(100, (prot / 20) * 100);
+            progressE.style.strokeDashoffset = dash - (dash * pct / 100);
+            impactE.innerText = Math.round(pct) + '%';
+
+            // Dynamic logic
+            if (prot < 16) {
+                adviceE.innerText = "ALERTA: Proteína insuficiente para alta producción. Incrementa la Harina de Soja.";
+                adviceE.style.borderLeftColor = "#ef4444";
+            } else if (prot > 19) {
+                adviceE.innerText = "AVISO: Exceso de proteína. Riesgo de estrés metabólico y desperdicio económico.";
+                adviceE.style.borderLeftColor = "#f59e0b";
+            } else {
+                adviceE.innerText = "DIETA BALANCEADA: Proporción perfecta para el ciclo actual. Huella de carbono minimizada.";
+                adviceE.style.borderLeftColor = "#06b6d4";
+            }
+        }
+
+        maizS.addEventListener('input', update);
+        sojaS.addEventListener('input', update);
+        nucleoS.addEventListener('input', update);
+
+        document.getElementById('btn-save').addEventListener('click', () => {
+            alert("✅ Formulación enviada con éxito al sistema de mezclado industrial.");
+        });
+
+        // Init
+        update();
+    </script>
+</body>
+
+</html>
